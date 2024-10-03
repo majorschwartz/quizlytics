@@ -72,26 +72,28 @@ const QuizContent = () => {
 	useEffect(() => {
 		const handleMouseUp = () => {
 			const selection = window.getSelection();
-			if (selection && selection.toString()) {
-				const selectedText = selection.toString();
+			const selectedText = selection.toString();
+
+			if (selectedText && selectedText !== lastSelectionRef.current) {
+				// New selection
+				if (lastSelectionRef.current) {
+					// Deselect previous selection if exists
+					recordTextSelection(lastSelectionRef.current, false);
+				}
 				recordTextSelection(selectedText, true);
 				lastSelectionRef.current = selectedText;
-			}
-		};
-
-		const handleMouseDown = () => {
-			if (lastSelectionRef.current) {
+			} else if (!selectedText && lastSelectionRef.current) {
+				// Text was deselected
 				recordTextSelection(lastSelectionRef.current, false);
 				lastSelectionRef.current = null;
 			}
+			// If selectedText === lastSelectionRef.current, do nothing (no change in selection)
 		};
 
 		window.addEventListener('mouseup', handleMouseUp);
-		window.addEventListener('mousedown', handleMouseDown);
 
 		return () => {
 			window.removeEventListener('mouseup', handleMouseUp);
-			window.removeEventListener('mousedown', handleMouseDown);
 		};
 	}, [recordTextSelection]);
 

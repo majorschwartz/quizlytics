@@ -26,6 +26,8 @@ ChartJS.register(
 );
 
 const QuizTimeline = ({ analytics }) => {
+	console.log("Analytics in QuizTimeline", analytics);
+	
 	const prepareChartData = () => {
 		if (!analytics.startTime || !analytics.endTime) return null;
 
@@ -38,17 +40,15 @@ const QuizTimeline = ({ analytics }) => {
 		];
 
 		if (analytics.answerTimes) {
-			Object.entries(analytics.answerTimes).forEach(
-				([questionId, { time }]) => {
-					if (time) {
-						data.push({
-							x: new Date(time),
-							y: 1,
-							label: `Q${questionId}`,
-						});
-					}
-				}
-			);
+			Object.entries(analytics.answerTimes).forEach(([questionNumber, answers]) => {
+				answers.forEach((answer) => {
+					data.push({
+						x: new Date(answer.time),
+						y: 1,
+						label: `Q${questionNumber}`,
+					});
+				});
+			});
 		}
 
 		if (analytics.textSelections) {
@@ -86,9 +86,15 @@ const QuizTimeline = ({ analytics }) => {
 			tooltip: {
 				callbacks: {
 					label: function (context) {
-						return `${context.raw.label}: ${new Date(
-							context.raw.x
-						).toLocaleTimeString()}`;
+						if (context.raw.y === 0) {
+							return `Quiz ${context.raw.label}`;
+						} else if (context.raw.y === 1) {
+							return `Question ${context.raw.label.replace('Q', '')}`;
+						} else if (context.raw.y === 2) {
+							return `Selection ${context.raw.label.replace('Selection ', '')}`;
+						} else {
+							return context.raw.label;
+						}
 					},
 				},
 			},
@@ -137,8 +143,8 @@ const QuizTimeline = ({ analytics }) => {
 				ticks: {
 					stepSize: 1,
 					callback: function (value) {
-						return ["Quiz", "Answers", "Selections", ""][
-							Math.ceil(value)
+						return ["Quiz", "Answers", "Selections"][
+							Math.floor(value)
 						];
 					},
 				},
@@ -147,26 +153,21 @@ const QuizTimeline = ({ analytics }) => {
 		clip: false,
 	};
 
-	// Add this function to determine the appropriate time unit and step size
+	// Update the getTimeConfig function
 	const getTimeConfig = (startTime, endTime) => {
 		const duration = (new Date(endTime) - new Date(startTime)) / 1000; // duration in seconds
-		if (duration > 60) {
-			return {
-				unit: "minute",
-				stepSize: 1,
-				displayFormats: {
-					minute: "HH:mm",
+		const interval = Math.ceil(duration / 11); // Calculate interval to get 12 ticks
+
+		return {
+			unit: 'second',
+			stepSize: interval,
+			displayFormats: {
+				second: (value) => {
+					const date = new Date(value);
+					return date.toTimeString().split(' ')[0]; // Format as HH:MM:SS
 				},
-			};
-		} else {
-			return {
-				unit: "second",
-				stepSize: 5,
-				displayFormats: {
-					second: "HH:mm:ss",
-				},
-			};
-		}
+			},
+		};
 	};
 
 	return (
@@ -214,6 +215,11 @@ const QuizTimeline = ({ analytics }) => {
 									analytics.startTime,
 									analytics.endTime
 								),
+								ticks: {
+									maxRotation: 0,
+									autoSkip: false,
+									count: 12,
+								},
 							},
 						},
 					}}

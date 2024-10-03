@@ -42,7 +42,10 @@ export const AnalyticsProvider = ({ children }) => {
 			...prev,
 			answerTimes: {
 				...prev.answerTimes,
-				[questionId]: { time: new Date().toISOString(), answer },
+				[questionId]: [
+					...(prev.answerTimes[questionId] || []),
+					{ time: new Date().toISOString(), answer },
+				],
 			},
 		}));
 	};
