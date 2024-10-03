@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Question from "../components/Question";
+import { useAnalytics } from "../contexts/AnalyticsContext";
+import { useNavigate } from "react-router-dom";
 
-const Quiz = () => {
+const QuizContent = () => {
+	const navigate = useNavigate();
 	const [answers, setAnswers] = useState({});
 	const [submitted, setSubmitted] = useState(false);
+	const { startQuiz, endQuiz, recordAnswer, recordTextSelection } = useAnalytics();
 
 	const questions = [
 		{
@@ -63,15 +67,36 @@ const Quiz = () => {
 		}
 	];
 
+	useEffect(() => {
+		startQuiz();
+	// eslint-disable-next-line
+	}, []);
+
 	const handleAnswer = (questionId, answer) => {
 		setAnswers(prev => ({ ...prev, [questionId]: answer }));
+		recordAnswer(questionId, answer);
 	};
 
 	const handleSubmit = () => {
-		// Here you would typically send the answers to your backend
 		console.log("Answers to be sent to backend:", answers);
 		setSubmitted(true);
+		endQuiz();
+		navigate("/analytics");
 	};
+
+	useEffect(() => {
+		const handleMouseUp = () => {
+			const selection = window.getSelection();
+			if (selection && selection.toString()) {
+				recordTextSelection(selection.toString());
+			}
+		};
+
+		window.addEventListener('mouseup', handleMouseUp);
+		return () => {
+			window.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [recordTextSelection]);
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -93,12 +118,24 @@ const Quiz = () => {
 				Submit Answers
 			</button>
 			{submitted && (
-				<p className="mt-4 text-green-600 font-semibold">
+				<>
+					<p className="mt-4 text-green-600 font-semibold">
 						Your answers have been submitted!
-				</p>
+					</p>
+					<button
+						onClick={() => navigate("/analytics")}
+						className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+					>
+						View Analytics
+					</button>
+				</>
 			)}
 		</div>
 	);
-}
+};
+
+const Quiz = () => (
+	<QuizContent />
+);
 
 export default Quiz;

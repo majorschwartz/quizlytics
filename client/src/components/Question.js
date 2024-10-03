@@ -2,8 +2,8 @@ import React from "react";
 
 const Question = ({ question, selectedAnswer, onSelect, submitted }) => {
 	return (
-		<div className="mb-6 p-4 border border-gray-200 rounded-lg">
-			<h2 className="text-xl font-semibold mb-3">
+		<div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+			<h2 className="text-xl font-medium mb-3">
 				{question.id}. {question.question}
 			</h2>
 			<div className="flex flex-col gap-4">
