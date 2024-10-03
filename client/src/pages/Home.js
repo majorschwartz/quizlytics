@@ -1,10 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAnalytics } from "../contexts/AnalyticsContext";
 
 const Home = () => {
 	const navigate = useNavigate();
+	const { clearAnalytics } = useAnalytics();
 
 	const handleStartQuiz = () => {
+		clearAnalytics();
 		navigate("/quiz");
 	};
 

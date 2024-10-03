@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Question from "../components/Question";
 import { useAnalytics } from "../contexts/AnalyticsContext";
 import { useNavigate } from "react-router-dom";
@@ -67,10 +67,33 @@ const QuizContent = () => {
 		}
 	];
 
+	const lastSelectionRef = useRef(null);
+
 	useEffect(() => {
-		startQuiz();
-	// eslint-disable-next-line
-	}, []);
+		const handleMouseUp = () => {
+			const selection = window.getSelection();
+			if (selection && selection.toString()) {
+				const selectedText = selection.toString();
+				recordTextSelection(selectedText, true);
+				lastSelectionRef.current = selectedText;
+			}
+		};
+
+		const handleMouseDown = () => {
+			if (lastSelectionRef.current) {
+				recordTextSelection(lastSelectionRef.current, false);
+				lastSelectionRef.current = null;
+			}
+		};
+
+		window.addEventListener('mouseup', handleMouseUp);
+		window.addEventListener('mousedown', handleMouseDown);
+
+		return () => {
+			window.removeEventListener('mouseup', handleMouseUp);
+			window.removeEventListener('mousedown', handleMouseDown);
+		};
+	}, [recordTextSelection]);
 
 	const handleAnswer = (questionId, answer) => {
 		setAnswers(prev => ({ ...prev, [questionId]: answer }));
@@ -85,18 +108,9 @@ const QuizContent = () => {
 	};
 
 	useEffect(() => {
-		const handleMouseUp = () => {
-			const selection = window.getSelection();
-			if (selection && selection.toString()) {
-				recordTextSelection(selection.toString());
-			}
-		};
-
-		window.addEventListener('mouseup', handleMouseUp);
-		return () => {
-			window.removeEventListener('mouseup', handleMouseUp);
-		};
-	}, [recordTextSelection]);
+		startQuiz();
+	// eslint-disable-next-line
+	}, []);
 
 	return (
 		<div className="container mx-auto px-4 py-8">
