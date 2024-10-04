@@ -53,11 +53,18 @@ const QuizTimeline = ({ analytics }) => {
 
 		if (analytics.textSelections) {
 			analytics.textSelections.forEach((selection, index) => {
-				if (selection && selection.time) {
+				if (selection && selection.selectedTime) {
 					data.push({
-						x: new Date(selection.time),
+						x: new Date(selection.selectedTime),
 						y: 2,
 						label: `Selection ${index + 1}`,
+					});
+				}
+				if (selection && selection.deselectedTime) {
+					data.push({
+						x: new Date(selection.deselectedTime),
+						y: 2,
+						label: `Deselection ${index + 1}`,
 					});
 				}
 			});
@@ -91,7 +98,7 @@ const QuizTimeline = ({ analytics }) => {
 						} else if (context.raw.y === 1) {
 							return `Question ${context.raw.label.replace('Q', '')}`;
 						} else if (context.raw.y === 2) {
-							return `Selection ${context.raw.label.replace('Selection ', '')}`;
+							return `${context.raw.label}`;
 						} else {
 							return context.raw.label;
 						}
@@ -143,9 +150,7 @@ const QuizTimeline = ({ analytics }) => {
 				ticks: {
 					stepSize: 1,
 					callback: function (value) {
-						return ["Quiz", "Answers", "Selections"][
-							Math.floor(value)
-						];
+						return ["Quiz", "Answers", "Selections"][value];
 					},
 				},
 			},
