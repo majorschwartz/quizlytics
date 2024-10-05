@@ -14,7 +14,7 @@ export const AnalyticsProvider = ({ children }) => {
 					endTime: null,
 					answerTimes: {},
 					textSelections: [],
-					visibilityChanges: [], // Ensure this is initialized as an empty array
+					visibilityChanges: [],
 			  };
 	});
 
@@ -28,7 +28,7 @@ export const AnalyticsProvider = ({ children }) => {
 			endTime: null,
 			answerTimes: {},
 			textSelections: [],
-			visibilityChanges: [], // Add this to reset visibilityChanges when starting a new quiz
+			visibilityChanges: [],
 		});
 	};
 
@@ -78,13 +78,27 @@ export const AnalyticsProvider = ({ children }) => {
 	};
 
 	const recordVisibilityChange = (isVisible) => {
-		setAnalytics((prev) => ({
-			...prev,
-			visibilityChanges: [
-				...prev.visibilityChanges,
-				{ time: new Date().toISOString(), isVisible },
-			],
-		}));
+		setAnalytics((prev) => {
+			const currentTime = new Date().toISOString();
+			let updatedVisibilityChanges = [...prev.visibilityChanges];
+
+			if (!isVisible) {
+				updatedVisibilityChanges.push({
+					hiddenTime: currentTime,
+					visibleTime: null,
+				});
+			} else {
+				const lastChange = updatedVisibilityChanges[updatedVisibilityChanges.length - 1];
+				if (lastChange && !lastChange.visibleTime) {
+					lastChange.visibleTime = currentTime;
+				}
+			}
+
+			return {
+				...prev,
+				visibilityChanges: updatedVisibilityChanges,
+			};
+		});
 	};
 
 	const clearAnalytics = () => {
@@ -93,7 +107,7 @@ export const AnalyticsProvider = ({ children }) => {
 			endTime: null,
 			answerTimes: {},
 			textSelections: [],
-			visibilityChanges: [], // Ensure this is reset when clearing analytics
+			visibilityChanges: [],
 		});
 	};
 
@@ -105,7 +119,7 @@ export const AnalyticsProvider = ({ children }) => {
 				endQuiz,
 				recordAnswer,
 				recordTextSelection,
-				recordVisibilityChange, // Add this new function
+				recordVisibilityChange,
 				clearAnalytics,
 			}}
 		>

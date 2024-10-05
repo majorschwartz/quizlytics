@@ -80,37 +80,50 @@ const QuizTimeline = ({ analytics }) => {
 			});
 		}
 
-		// Add visibility changes
+		const visibilityLines = [];
 		if (analytics.visibilityChanges) {
 			analytics.visibilityChanges.forEach((change, index) => {
-				data.push({
-					x: new Date(change.time),
-					y: 3,
-					label: change.isVisible ? "Visible" : "Hidden",
-				});
+				if (change.hiddenTime && change.visibleTime) {
+					visibilityLines.push({
+						type: 'line',
+						xMin: new Date(change.hiddenTime),
+						xMax: new Date(change.visibleTime),
+						yMin: 3,
+						yMax: 3,
+						borderColor: 'rgba(153, 102, 255, 0.5)',
+						borderWidth: 2,
+					});
+				}
 			});
 		}
 
-		return { data: data.sort((a, b) => a.x - b.x), selectionLines };
+		if (analytics.visibilityChanges) {
+			analytics.visibilityChanges.forEach((change) => {
+				if (change.hiddenTime) {
+					data.push({
+						x: new Date(change.hiddenTime),
+						y: 3,
+						label: "Hidden",
+					});
+				}
+				if (change.visibleTime) {
+					data.push({
+						x: new Date(change.visibleTime),
+						y: 3,
+						label: "Visible",
+					});
+				}
+			});
+		}
+
+		return { data: data.sort((a, b) => a.x - b.x), selectionLines, visibilityLines };
 	};
 
-	const { data: chartData, selectionLines } = prepareChartData();
+	const { data: chartData, selectionLines, visibilityLines } = prepareChartData();
 
 	const chartOptions = {
 		responsive: true,
 		plugins: {
-			title: {
-				display: true,
-				text: "Quiz Timeline",
-				font: {
-					size: 18,
-					weight: "bold",
-				},
-				padding: {
-					top: 10,
-					bottom: 30,
-				},
-			},
 			tooltip: {
 				callbacks: {
 					label: function (context) {
@@ -145,7 +158,7 @@ const QuizTimeline = ({ analytics }) => {
 				},
 			},
 			annotation: {
-				annotations: selectionLines,
+				annotations: [...selectionLines, ...visibilityLines],
 			},
 		},
 		scales: {
@@ -155,7 +168,7 @@ const QuizTimeline = ({ analytics }) => {
 					unit: "second",
 					stepSize: 5,
 					displayFormats: {
-						second: "HH:mm:ss",
+							second: "HH:mm:ss",
 					},
 				},
 				title: {
@@ -182,10 +195,9 @@ const QuizTimeline = ({ analytics }) => {
 		clip: false,
 	};
 
-	// Update the getTimeConfig function
 	const getTimeConfig = (startTime, endTime) => {
-		const duration = (new Date(endTime) - new Date(startTime)) / 1000; // duration in seconds
-		const interval = Math.ceil(duration / 11); // Calculate interval to get 12 ticks
+		const duration = (new Date(endTime) - new Date(startTime)) / 1000;
+		const interval = Math.ceil(duration / 11);
 
 		return {
 			unit: 'second',
@@ -193,7 +205,7 @@ const QuizTimeline = ({ analytics }) => {
 			displayFormats: {
 				second: (value) => {
 					const date = new Date(value);
-					return date.toTimeString().split(' ')[0]; // Format as HH:MM:SS
+					return date.toTimeString().split(' ')[0];
 				},
 			},
 		};
@@ -201,6 +213,7 @@ const QuizTimeline = ({ analytics }) => {
 
 	return (
 		<>
+			<h2 className="text-xl font-semibold mb-4">Text Selections</h2>
 			{chartData && chartData.length > 0 ? (
 				<Line
 					data={{
