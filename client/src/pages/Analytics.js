@@ -27,8 +27,7 @@ const Analytics = () => {
 			>
 				Back to Home
 			</button>
-			<h1 className="text-3xl font-bold mb-6">Quiz Analytics</h1>
-			<div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+			<div className="bg-white rounded px-8 pt-6 pb-8 mb-4">
 				<QuizTimeline analytics={analytics} />
 				<QuizDetails analytics={analytics} formatDate={formatDate} />
 				<TextSelections analytics={analytics} formatDate={formatDate} />

@@ -13,6 +13,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import annotationPlugin from 'chartjs-plugin-annotation';
 
 ChartJS.register(
 	CategoryScale,
@@ -22,7 +23,8 @@ ChartJS.register(
 	Title,
 	Tooltip,
 	Legend,
-	TimeScale
+	TimeScale,
+	annotationPlugin
 );
 
 const QuizTimeline = ({ analytics }) => {
@@ -51,16 +53,24 @@ const QuizTimeline = ({ analytics }) => {
 			});
 		}
 
+		const selectionLines = [];
 		if (analytics.textSelections) {
 			analytics.textSelections.forEach((selection, index) => {
-				if (selection && selection.selectedTime) {
+				if (selection && selection.selectedTime && selection.deselectedTime) {
+					selectionLines.push({
+						type: 'line',
+						xMin: new Date(selection.selectedTime),
+						xMax: new Date(selection.deselectedTime),
+						yMin: 2,
+						yMax: 2,
+						borderColor: 'rgba(255, 99, 132, 0.5)',
+						borderWidth: 2,
+					});
 					data.push({
 						x: new Date(selection.selectedTime),
 						y: 2,
 						label: `Selection ${index + 1}`,
 					});
-				}
-				if (selection && selection.deselectedTime) {
 					data.push({
 						x: new Date(selection.deselectedTime),
 						y: 2,
@@ -70,10 +80,21 @@ const QuizTimeline = ({ analytics }) => {
 			});
 		}
 
-		return data.sort((a, b) => a.x - b.x);
+		// Add visibility changes
+		if (analytics.visibilityChanges) {
+			analytics.visibilityChanges.forEach((change, index) => {
+				data.push({
+					x: new Date(change.time),
+					y: 3,
+					label: change.isVisible ? "Visible" : "Hidden",
+				});
+			});
+		}
+
+		return { data: data.sort((a, b) => a.x - b.x), selectionLines };
 	};
 
-	const chartData = prepareChartData();
+	const { data: chartData, selectionLines } = prepareChartData();
 
 	const chartOptions = {
 		responsive: true,
@@ -123,6 +144,9 @@ const QuizTimeline = ({ analytics }) => {
 					return context.dataset.data[context.dataIndex].label;
 				},
 			},
+			annotation: {
+				annotations: selectionLines,
+			},
 		},
 		scales: {
 			x: {
@@ -146,11 +170,11 @@ const QuizTimeline = ({ analytics }) => {
 			},
 			y: {
 				beginAtZero: true,
-				max: 2,
+				max: 3,
 				ticks: {
 					stepSize: 1,
 					callback: function (value) {
-						return ["Quiz", "Answers", "Selections"][value];
+						return ["Quiz", "Answers", "Selections", "Visibility"][value];
 					},
 				},
 			},
@@ -191,6 +215,7 @@ const QuizTimeline = ({ analytics }) => {
 											"rgba(75, 192, 192, 0.6)",
 											"rgba(255, 159, 64, 0.6)",
 											"rgba(255, 99, 132, 0.6)",
+											"rgba(153, 102, 255, 0.6)",
 										][value] || "rgba(200, 200, 200, 0.6)"
 									);
 								},
@@ -201,6 +226,7 @@ const QuizTimeline = ({ analytics }) => {
 											"rgba(75, 192, 192, 1)",
 											"rgba(255, 159, 64, 1)",
 											"rgba(255, 99, 132, 1)",
+											"rgba(153, 102, 255, 1)",
 										][value] || "rgba(200, 200, 200, 1)"
 									);
 								},
@@ -228,7 +254,7 @@ const QuizTimeline = ({ analytics }) => {
 							},
 						},
 					}}
-					plugins={[ChartDataLabels]}
+					plugins={[ChartDataLabels, annotationPlugin]}
 				/>
 			) : (
 				<p>No data available for chart</p>

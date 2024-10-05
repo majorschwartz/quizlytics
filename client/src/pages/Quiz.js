@@ -7,7 +7,7 @@ const QuizContent = () => {
 	const navigate = useNavigate();
 	const [answers, setAnswers] = useState({});
 	const [submitted, setSubmitted] = useState(false);
-	const { startQuiz, endQuiz, recordAnswer, recordTextSelection } = useAnalytics();
+	const { startQuiz, endQuiz, recordAnswer, recordTextSelection, recordVisibilityChange } = useAnalytics();
 
 	const questions = [
 		{
@@ -111,6 +111,16 @@ const QuizContent = () => {
 
 	useEffect(() => {
 		startQuiz();
+
+		const handleVisibilityChange = () => {
+			recordVisibilityChange(!document.hidden);
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
 	// eslint-disable-next-line
 	}, []);
 

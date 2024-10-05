@@ -14,6 +14,7 @@ export const AnalyticsProvider = ({ children }) => {
 					endTime: null,
 					answerTimes: {},
 					textSelections: [],
+					visibilityChanges: [], // Ensure this is initialized as an empty array
 			  };
 	});
 
@@ -27,6 +28,7 @@ export const AnalyticsProvider = ({ children }) => {
 			endTime: null,
 			answerTimes: {},
 			textSelections: [],
+			visibilityChanges: [], // Add this to reset visibilityChanges when starting a new quiz
 		});
 	};
 
@@ -75,12 +77,23 @@ export const AnalyticsProvider = ({ children }) => {
 		});
 	};
 
+	const recordVisibilityChange = (isVisible) => {
+		setAnalytics((prev) => ({
+			...prev,
+			visibilityChanges: [
+				...prev.visibilityChanges,
+				{ time: new Date().toISOString(), isVisible },
+			],
+		}));
+	};
+
 	const clearAnalytics = () => {
 		setAnalytics({
 			startTime: null,
 			endTime: null,
 			answerTimes: {},
 			textSelections: [],
+			visibilityChanges: [], // Ensure this is reset when clearing analytics
 		});
 	};
 
@@ -92,6 +105,7 @@ export const AnalyticsProvider = ({ children }) => {
 				endQuiz,
 				recordAnswer,
 				recordTextSelection,
+				recordVisibilityChange, // Add this new function
 				clearAnalytics,
 			}}
 		>
