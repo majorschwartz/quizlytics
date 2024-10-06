@@ -193,6 +193,9 @@ const QuizTimeline = ({ analytics }) => {
 			},
 		},
 		clip: false,
+		animation: {
+			duration: 0
+		},
 	};
 
 	const getTimeConfig = (startTime, endTime) => {
