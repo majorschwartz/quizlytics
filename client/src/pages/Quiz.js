@@ -7,65 +7,7 @@ const QuizContent = () => {
 	const navigate = useNavigate();
 	const [answers, setAnswers] = useState({});
 	const [submitted, setSubmitted] = useState(false);
-	const { startQuiz, endQuiz, recordAnswer, recordTextSelection, recordVisibilityChange } = useAnalytics();
-
-	const questions = [
-		{
-			id: 1,
-			question: "Which of the following is NOT a function of the endoplasmic reticulum?",
-			options: [
-				"Protein synthesis",
-				"Lipid synthesis",
-				"Calcium storage",
-				"ATP production"
-			],
-			correctAnswer: "ATP production"
-		},
-		{
-			id: 2,
-			question: "What is the term for the process by which RNA is synthesized from DNA?",
-			options: [
-				"Translation",
-				"Transcription",
-				"Replication",
-				"Transduction"
-			],
-			correctAnswer: "Transcription"
-		},
-		{
-			id: 3,
-			question: "Which of the following is a unique characteristic of archaebacteria?",
-			options: [
-				"Presence of peptidoglycan in cell walls",
-				"Lipids with ester bonds in cell membranes",
-				"Introns in genes",
-				"Methane production in anaerobic conditions"
-			],
-			correctAnswer: "Methane production in anaerobic conditions"
-		},
-		{
-			id: 4,
-			question: "What is the role of telomerase in cellular aging?",
-			options: [
-				"It shortens telomeres",
-				"It prevents telomere elongation",
-				"It maintains telomere length",
-				"It has no effect on telomeres"
-			],
-			correctAnswer: "It maintains telomere length"
-		},
-		{
-			id: 5,
-			question: "Which of the following is NOT a component of the electron transport chain?",
-			options: [
-				"NADH dehydrogenase",
-				"Cytochrome c oxidase",
-				"ATP synthase",
-				"Pyruvate dehydrogenase"
-			],
-			correctAnswer: "Pyruvate dehydrogenase"
-		}
-	];
+	const { startQuiz, endQuiz, questions, recordAnswer, recordTextSelection, recordVisibilityChange } = useAnalytics();
 
 	const lastSelectionRef = useRef(null);
 
@@ -75,19 +17,15 @@ const QuizContent = () => {
 			const selectedText = selection.toString();
 
 			if (selectedText && selectedText !== lastSelectionRef.current) {
-				// New selection
 				if (lastSelectionRef.current) {
-					// Deselect previous selection if exists
 					recordTextSelection(lastSelectionRef.current, false);
 				}
 				recordTextSelection(selectedText, true);
 				lastSelectionRef.current = selectedText;
 			} else if (!selectedText && lastSelectionRef.current) {
-				// Text was deselected
 				recordTextSelection(lastSelectionRef.current, false);
 				lastSelectionRef.current = null;
 			}
-			// If selectedText === lastSelectionRef.current, do nothing (no change in selection)
 		};
 
 		window.addEventListener('mouseup', handleMouseUp);

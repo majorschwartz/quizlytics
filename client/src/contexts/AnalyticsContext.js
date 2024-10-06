@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useQuestions } from "./QuestionsContext";
 
 const AnalyticsContext = createContext();
 
 export const useAnalytics = () => useContext(AnalyticsContext);
 
 export const AnalyticsProvider = ({ children }) => {
+	const { questions } = useQuestions();
 	const [analytics, setAnalytics] = useState(() => {
 		const savedAnalytics = localStorage.getItem("quizAnalytics");
 		return savedAnalytics
@@ -12,6 +14,7 @@ export const AnalyticsProvider = ({ children }) => {
 			: {
 					startTime: null,
 					endTime: null,
+					questions: questions,
 					answerTimes: {},
 					textSelections: [],
 					visibilityChanges: [],
@@ -26,6 +29,7 @@ export const AnalyticsProvider = ({ children }) => {
 		setAnalytics({
 			startTime: new Date().toISOString(),
 			endTime: null,
+			questions: questions,
 			answerTimes: {},
 			textSelections: [],
 			visibilityChanges: [],
@@ -105,6 +109,7 @@ export const AnalyticsProvider = ({ children }) => {
 		setAnalytics({
 			startTime: null,
 			endTime: null,
+			questions: questions,
 			answerTimes: {},
 			textSelections: [],
 			visibilityChanges: [],
@@ -115,6 +120,7 @@ export const AnalyticsProvider = ({ children }) => {
 		<AnalyticsContext.Provider
 			value={{
 				analytics,
+				questions,
 				startQuiz,
 				endQuiz,
 				recordAnswer,

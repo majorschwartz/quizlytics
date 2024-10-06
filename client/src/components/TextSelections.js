@@ -1,6 +1,16 @@
 import React from "react";
 
 const TextSelections = ({ analytics, formatDate }) => {
+	// Check if there are any text selections
+	if (analytics.textSelections.length === 0) {
+		return (
+			<>
+				<h2 className="text-xl font-semibold mt-6 mb-4">Text Selections</h2>
+				<p className="text-gray-600">No text selections have been made.</p>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<h2 className="text-xl font-semibold mt-6 mb-4">Text Selections</h2>
