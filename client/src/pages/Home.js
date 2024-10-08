@@ -18,7 +18,7 @@ const Home = () => {
 					Quiz Analytics Tool
 				</h1>
 				<p className="text-xl text-gray-600 mb-8">
-					Start by clicking the button below and taking the quiz.
+					Start by clicking the button below and taking the quiz. Then, see the analytics after.
 				</p>
 				<button
 					onClick={handleStartQuiz}
