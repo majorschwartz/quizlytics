@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import annotationPlugin from 'chartjs-plugin-annotation';
+import annotationPlugin from "chartjs-plugin-annotation";
 
 ChartJS.register(
 	CategoryScale,
@@ -28,8 +28,6 @@ ChartJS.register(
 );
 
 const QuizTimeline = ({ analytics }) => {
-	console.log("Analytics in QuizTimeline", analytics);
-	
 	const prepareChartData = () => {
 		if (!analytics.startTime || !analytics.endTime) return null;
 
@@ -42,28 +40,34 @@ const QuizTimeline = ({ analytics }) => {
 		];
 
 		if (analytics.answerTimes) {
-			Object.entries(analytics.answerTimes).forEach(([questionNumber, answers]) => {
-				answers.forEach((answer) => {
-					data.push({
-						x: new Date(answer.time),
-						y: 1,
-						label: `Q${questionNumber}`,
+			Object.entries(analytics.answerTimes).forEach(
+				([questionNumber, answers]) => {
+					answers.forEach((answer) => {
+						data.push({
+							x: new Date(answer.time),
+							y: 1,
+							label: `Q${questionNumber}`,
+						});
 					});
-				});
-			});
+				}
+			);
 		}
 
 		const selectionLines = [];
 		if (analytics.textSelections) {
 			analytics.textSelections.forEach((selection, index) => {
-				if (selection && selection.selectedTime && selection.deselectedTime) {
+				if (
+					selection &&
+					selection.selectedTime &&
+					selection.deselectedTime
+				) {
 					selectionLines.push({
-						type: 'line',
+						type: "line",
 						xMin: new Date(selection.selectedTime),
 						xMax: new Date(selection.deselectedTime),
 						yMin: 2,
 						yMax: 2,
-						borderColor: 'rgba(255, 99, 132, 0.5)',
+						borderColor: "rgba(255, 99, 132, 0.5)",
 						borderWidth: 2,
 					});
 					data.push({
@@ -85,12 +89,12 @@ const QuizTimeline = ({ analytics }) => {
 			analytics.visibilityChanges.forEach((change, index) => {
 				if (change.hiddenTime && change.visibleTime) {
 					visibilityLines.push({
-						type: 'line',
+						type: "line",
 						xMin: new Date(change.hiddenTime),
 						xMax: new Date(change.visibleTime),
 						yMin: 3,
 						yMax: 3,
-						borderColor: 'rgba(153, 102, 255, 0.5)',
+						borderColor: "rgba(153, 102, 255, 0.5)",
 						borderWidth: 2,
 					});
 				}
@@ -116,10 +120,18 @@ const QuizTimeline = ({ analytics }) => {
 			});
 		}
 
-		return { data: data.sort((a, b) => a.x - b.x), selectionLines, visibilityLines };
+		return {
+			data: data.sort((a, b) => a.x - b.x),
+			selectionLines,
+			visibilityLines,
+		};
 	};
 
-	const { data: chartData, selectionLines, visibilityLines } = prepareChartData();
+	const {
+		data: chartData,
+		selectionLines,
+		visibilityLines,
+	} = prepareChartData();
 
 	const chartOptions = {
 		responsive: true,
@@ -130,7 +142,10 @@ const QuizTimeline = ({ analytics }) => {
 						if (context.raw.y === 0) {
 							return `Quiz ${context.raw.label}`;
 						} else if (context.raw.y === 1) {
-							return `Question ${context.raw.label.replace('Q', '')}`;
+							return `Question ${context.raw.label.replace(
+								"Q",
+								""
+							)}`;
 						} else if (context.raw.y === 2) {
 							return `${context.raw.label}`;
 						} else {
@@ -168,7 +183,7 @@ const QuizTimeline = ({ analytics }) => {
 					unit: "second",
 					stepSize: 5,
 					displayFormats: {
-							second: "HH:mm:ss",
+						second: "HH:mm:ss",
 					},
 				},
 				title: {
@@ -187,14 +202,16 @@ const QuizTimeline = ({ analytics }) => {
 				ticks: {
 					stepSize: 1,
 					callback: function (value) {
-						return ["Quiz", "Answers", "Selections", "Visibility"][value];
+						return ["Quiz", "Answers", "Selections", "Visibility"][
+							value
+						];
 					},
 				},
 			},
 		},
 		clip: false,
 		animation: {
-			duration: 0
+			duration: 0,
 		},
 	};
 
@@ -203,12 +220,12 @@ const QuizTimeline = ({ analytics }) => {
 		const interval = Math.ceil(duration / 11);
 
 		return {
-			unit: 'second',
+			unit: "second",
 			stepSize: interval,
 			displayFormats: {
 				second: (value) => {
 					const date = new Date(value);
-					return date.toTimeString().split(' ')[0];
+					return date.toTimeString().split(" ")[0];
 				},
 			},
 		};
@@ -216,7 +233,6 @@ const QuizTimeline = ({ analytics }) => {
 
 	return (
 		<>
-			<h2 className="text-xl font-semibold mb-4">Text Selections</h2>
 			{chartData && chartData.length > 0 ? (
 				<Line
 					data={{

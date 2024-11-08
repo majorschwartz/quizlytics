@@ -10,11 +10,13 @@ const Analytics = () => {
 	const { analytics, clearAnalytics } = useAnalytics();
 
 	const formatDate = (dateString) => {
-		return dateString ? new Date(dateString).toLocaleString() : 'N/A';
+		return dateString ? new Date(dateString).toLocaleString() : "N/A";
 	};
 
 	const handleClearAnalytics = () => {
-		if (window.confirm("Are you sure you want to clear all analytics data?")) {
+		if (
+			window.confirm("Are you sure you want to clear all analytics data?")
+		) {
 			clearAnalytics();
 		}
 	};
